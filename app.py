@@ -25,7 +25,7 @@ def preprocess_text(text):
     tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return ' '.join(tokens)
 
-# Define the SpamClassifier model (must match your training definition)
+# Define the SpamClassifier model structure (must match your training definition)
 class SpamClassifier(nn.Module):
     def __init__(self, input_dim):
         super(SpamClassifier, self).__init__()
@@ -43,13 +43,13 @@ class SpamClassifier(nn.Module):
 # Initialize the Flask app
 app = Flask(__name__)
 
-# Load the saved model and vectorizer
-input_dim = 5000  # Must match the feature dimension used in training
+# Load the saved model and vectorizer from the specified paths
+input_dim = 5000  # This must match the feature dimension used during training
 model = SpamClassifier(input_dim)
-model.load_state_dict(torch.load('spam_classifier.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('./spam_classifier.pth', map_location=torch.device('cpu')))
 model.eval()
 
-with open('tfidf_vectorizer.pkl', 'rb') as f:
+with open('./tfidf_vectorizer.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
 @app.route('/predict', methods=['POST'])
@@ -67,7 +67,7 @@ def predict():
     with torch.no_grad():
         output = model(features_tensor).item()
 
-    # Convert probability to binary prediction
+    # Convert probability to binary prediction (1 for spam, 0 for not spam)
     prediction = 1 if output >= 0.5 else 0
 
     # Return the prediction and probability as JSON
